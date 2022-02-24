@@ -1,60 +1,129 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-
-    <title>實價登錄安安</title>
-</head>
-<body>
-<div class="row" wid>
-    <div class="col-md-12 col-12 col-12">
-        <div class="panel panel-default">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      <!-- Bootstrap CSS -->
+      <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+      <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+      <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+      <title>小丁線上看房</title>
+   </head>
+   <body>
+      <script>         
+         function search() {
+           location.replace(
+             '/?city='                                         + 
+             $("select[name=city]").val()                      + 
+             '&district=' + $("input[name=district]").val()    + 
+             '&houseAddr=' + $("input[name=house_local]").val()+
+             '&only_same_year=' + $('input[name="only_search_simlarYear"]').is(':checked')
+           );
+         }
+      </script>
+      <div class="panel panel-default">
+         <div class="panel-heading">
+            <h2>小丁看房神器</h2>
+            <p>做研究都要爬文獻了、那你為什麼買房不用？</p>
+         </div>
+      </div>
+      <div class="panel-body">
+         <select name="city" value>
+            <option value="臺北市">臺北市</option>
+            <option value="臺中市">臺中市</option>
+            <option value="基隆市">基隆市</option>
+            <option value="臺南市">臺南市</option>
+            <option value="高雄市">高雄市</option>
+            <option value="新北市">新北市</option>
+            <option value="宜蘭縣">宜蘭縣</option>
+            <option value="桃園市">桃園市</option>
+            <option value="嘉義市">嘉義市</option>
+            <option value="新竹縣">新竹縣</option>
+            <option value="苗栗縣">苗栗縣</option>
+            <option value="南投縣">南投縣</option>
+            <option value="彰化縣">彰化縣</option>
+            <option value="新竹市">新竹市</option>
+            <option value="雲林縣">雲林縣</option>
+            <option value="嘉義縣">嘉義縣</option>
+            <option value="屏東縣">屏東縣</option>
+            <option value="花蓮縣">花蓮縣</option>
+            <option value="臺東縣">臺東縣</option>
+            <option value="金門縣">金門縣</option>
+            <option value="馬公市">馬公市</option>
+         </select>
+         <input type='text' name='district' placeholder="哪個區域（EX：萬華區）", value="{{ dbInitVal['district'] or '' }}"  />
+         <input type='text' name='house_local' placeholder="欲查詢地址之街道巷弄" value="{{ dbInitVal['houseAddr'] or '' }}" />
+         <input type='number' name='which_floor' placeholder="所在樓層" value="{{ dbInitVal['which_floor'] or '' }}" />
+         <input type="checkbox" name="only_search_simlarYear" checked>僅搜尋相似屋齡物件
+         <button type='submit' onclick=search()>聽話！讓小丁看看！</button>
+      </div>
+      
+      <!-- first section -->
+      <div class="panel-group" id="accordion">
+         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3>聖豪ㄉ實價登錄</h3>
+               <h4 class="panel-title">
+                  <a data-toggle="collapse" data-parent="#accordion" 
+                     href="#collapseOne">
+                  小丁線上房價點評
+                  </a>
+               </h4>
             </div>
-            <div class="panel-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered table-hover">
-                        <thead>
-                        <tr>
-                            {% for i in labels %}
-                                <td>{{ i }}</td>
-                            {% endfor %}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for i in content %}
-                            <tr>
-                                {% for j in i %}
-                                    <td>{{ j }}</td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div id="collapseOne" class="panel-collapse collapse in">
+               <div class="panel-body">
+                  讓推理王小丁分析一下 等等再跟你說！
+               </div>
             </div>
+         </div>
+      </div>
+
+      <!-- second section -->
+      {% for which_floor in content %}
+      <div class="panel-group" id="floor{{which_floor}}panel">
+        <div class="panel panel-default">
+           <div class="panel-heading">
+              <h4 class="panel-title">
+                 <a data-toggle="collapse" data-parent="#floor{{which_floor}}panel" 
+                    href="#collapse{{which_floor}}">
+					實價登錄樓層 #{{which_floor}}
+          </a>
+				</div>
+
+        <div id="collapse{{which_floor}}" class="panel-collapse collapse">
+          <div class="panel-body">
+					<table class="table table-condensed table-striped" id="floor_money_panel">
+            <thead>
+                <tr>
+                  {% for l in labels %}
+                  <th>{{l}}</th>
+                  {% endfor %}
+                </tr>
+
+                <tbody>
+                  {% for curr_row in content[which_floor] %}
+                    <tr>
+                      {% for each_col in curr_row %}
+                      <td>{{ each_col }}</td>
+                      {% endfor %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+
+            </thead>
+           </table>
         </div>
+      </div>
+      </div>
+      {% endfor %}
 
-    </div>
+      <script>
+        window.onload = (function() {
+           vv = "{{ dbInitVal['city'] or 臺北市 }}"
+           $("select[name=city]").val(vv)
+ 
 
-</div>
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
-        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
-        crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
-        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
-        crossorigin="anonymous"></script>
-</body>
+         });
+      </script>
+
+   </body>
 </html>
