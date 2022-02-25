@@ -98,13 +98,69 @@
           </div>
         </div>
       </div>
+      <!-- Result Section -->
+      <section class="leading-7">
+        <header>
+          <h1 class="text-lg font-bold">小丁線上點評</h1>
+        </header>
+        <div>
+          {% if content|length > 0 %}
+            <p>小丁驚訝的發現！！！</p>
+            <p>實價登錄成交最低樓層為 {{ analyzeResult['lowest_floorInfo'][0]}}樓，其平均每坪 {{ '%.2f' | format(analyzeResult['lowest_floorInfo'][1]|float) }} 萬元</p>
+            <p>實價登錄成交最高樓層為 {{ analyzeResult['highest_floorInfo'][0] }}樓，其平均每坪 {{ '%.2f' | format(analyzeResult['highest_floorInfo'][1]|float) }} 萬元</p>
+            <p>意味著每增加一層樓，每坪單價便須增加 {{ analyzeResult['perFloor_addMoney'] }} 元新台幣！</p>
+
+            {% if dbInitVal['landsize_Ibuy'] and dbInitVal['which_floor'] %}
+              <p>假設您現在想買位於 {{dbInitVal['which_floor']}} 樓 {{dbInitVal['landsize_Ibuy']}} 坪的中古屋...</p>
+              <p>
+                那麼小丁推測此條件之房屋底價為： {{dbInitVal['landsize_Ibuy']}}坪
+                * ({{'%.2f'|format(analyzeResult['lowest_floorInfo'][1]|float)}}萬 + {{analyzeResult['perFloor_addMoney']}}元 * {{ dbInitVal['which_floor'] - analyzeResult['lowest_floorInfo'][0] }}個樓層差 )
+                = {{ '%.2f' | format(dbInitVal['landsize_Ibuy'] * (analyzeResult['lowest_floorInfo'][1]*10000 + analyzeResult['perFloor_addMoney'] * (dbInitVal['which_floor'] - analyzeResult['lowest_floorInfo'][0] ))/10000 | float)}} 萬元總價唷！
+              </p>
+              <p>您所搜索的房屋條件來說，平均單價為每坪 {{ analyzeResult['avg_landCost'] }} 萬元，因此 {{dbInitVal['landsize_Ibuy']}}坪 的房子均價應該在 {{ '%.2f'|format(analyzeResult['avg_landCost'] * dbInitVal['landsize_Ibuy']|float) }}萬總價。</p>
+              <p>銀行估值最高總價應為 {{ '%.2f'|format(analyzeResult['avg_landCost'] * dbInitVal['landsize_Ibuy'] * 1.15|float) }} 萬元。</p>
+              <!-- TODO: Extra Breaker -->
+              <p>小丁還發現了有個住在 {{ analyzeResult['richest_buyerInfo'][0] }} 樓的盤子買到最高價每坪 {{ '%.2f'| format(analyzeResult['richest_buyerInfo'][1]|float) }} 萬元</p>
+
+              <p>
+                因此賣家心底的價格（即實價登錄最高價）應該至少要 {{dbInitVal['landsize_Ibuy']}}坪 * {{ '%.2f'| format(analyzeResult['richest_buyerInfo'][1]|float) }}
+                = 總價 {{ '%.2f'| format(analyzeResult['richest_buyerInfo'][1]*dbInitVal['landsize_Ibuy']|float) }} 萬元才願意賣唷QQ
+              </p>
+            {% endif %}
+            <div class="text-sm text-gray-500">
+              <p>註1：能成交的才是好價格、本分析僅供參考，實際議價成交價格可能會有所出入。</p>
+              <p>註2：本分析資料來源內政部實價登錄，並未像實價登錄2.0一樣將極端買賣價隱藏、而是全部顯示。</p>
+            </div>
+          {% else %}
+            <p>快輸入你想購買ㄉ房屋條件來分析議價空間ㄅ :)</p>
+            <p> 房屋篩選條件設定太嚴苛ㄉ話小丁可能會搜尋不到結果唷 QQ </p>
+          {% endif %}
+        </div>
+      </section>
+      {% if content|length > 0 %}
+        <section class="mt-8 leading-7">
+          <header>
+            <h1 class="text-lg font-bold">坪數與公設綜合分析</h1>
+          </header>
+          <div class="flex items-center">
+          <canvas id="chart" class="cv" width="600" height="400"></canvas>
+          <canvas id="chart1" class="cv" width="600" height="400"></canvas>
+          </div>
+        </section>
+
+        <section class="mt-8 leading-7">
+          <header>
+            <h1 class="text-lg font-bold">實價登錄分析</h1>
+          </header>
+        </section>
+      {% endif %}
     </div>
 
     <!-- Footer -->
     <footer class="max-w-8xl mx-auto px-4 sm:px-6 md:px-8 text-sm leading-6 mt-16">
       <div class="pt-10 pb-28 border-t border-slate-200 sm:flex justify-between text-slate-500 dark:border-slate-200/5">
         <div>
-          <h2 class="text-bold">關於此專案</h2>
+          <h2 class="font-bold mb-4">關於此專案</h2>
           <div class="card-body">
             <p class="mb-2">此專案為公益性質免費在線中古屋房價分析工具 :)</p>
             <p class="mb-2">程式碼完全透明並開源於 <a class="text-blue-500" href="http://github.com/aaaddress1/buyHouseAnalyzer">aaaddress1/buyHouseAnalyzer</a></p>
