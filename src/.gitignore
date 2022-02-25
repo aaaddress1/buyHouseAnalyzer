@@ -1,0 +1,6 @@
+# Ignore Data
+*.zip
+real_*/
+
+# Frotend
+node_modules/
