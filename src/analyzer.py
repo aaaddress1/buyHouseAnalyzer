@@ -76,26 +76,28 @@ for city_symbol in ['a','f']:# 'b', 'c', 'd', 'e',  ]:#'g', 'h', 'i', 'j', 'k', 
 '''
 
 # Taipei = "a"
-def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor, in_houseOld):
+def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor, in_houseOld, in_yearRange):
 
+	
 	dfs = []
 	for d in dirs:
-		if os.path.isfile(os.path.join(d, f'{in_city_symbol}_lvr_land_a.csv')):
+		if os.path.isfile(os.path.join(d, f'{in_city_symbol}_lvr_land_a.csv')) and int(d[-4:-1]) in in_yearRange:
 			df = pd.read_csv(os.path.join(d,f'{in_city_symbol}_lvr_land_a.csv'), index_col=False)
 			df['Q'] = d[-1]
 			dfs.append(df.iloc[1:])
 
-	df = pd.concat(dfs, sort=True)
+	if len(dfs) < 1:
+		return ['成交日期', '購買物件', '格局', '樓層', '屋齡', '主建物坪數', '公設比', '總價', '每坪價格（扣除車位）', '備註'], {}, {'lowest_floorInfo': [0,0], 'highest_floorInfo':[0,0], 'perFloor_addMoney': 0} 
 
-	# 平方公尺換成坪
-	df['單價元平方公尺'] = df['單價元平方公尺'].astype(float)
-	df['單價元坪'] = df['單價元平方公尺'] * 3.30579
+	df = pd.concat(dfs, sort=True)
 	# 建物型態
 	df['建物型態2'] = df['建物型態'].str.split('(').str[0]
 	df = df[df['備註'].isnull()]
 
+	# 平方公尺換成坪
+	df['單價元平方公尺'] = df['單價元平方公尺'].astype(float)
+	df['單價元坪'] = df['單價元平方公尺'] * 3.30579
 	df['土地位置建物門牌'] = df['土地位置建物門牌'].apply(lambda a: transform_CNnum_toNormal_Num(a))
-	
 
 	if in_house_addr: df = df[ df['土地位置建物門牌'].str.contains(in_house_addr, na=False) ]
 	if in_district: df = df[ df['鄉鎮市區'].str.contains(in_district, na=False) ]
@@ -148,7 +150,7 @@ def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor, in
 			try: 
 				single_land_cost = round(float(curr_row['單價元坪'] / 10000), 2)
 				if math.isnan( curr_row['單價元坪'] ):
-					conti
+					continue
 			except:
 				single_land_cost = '不詳'
 				continue

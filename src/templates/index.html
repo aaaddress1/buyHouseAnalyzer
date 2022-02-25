@@ -30,7 +30,8 @@
 			 $("select[name=city]").val()                      + 
 			 '&district=' + $("input[name=district]").val()    + 
 			 '&houseAddr=' + $("input[name=house_local]").val()+
-			 '&only_same_year=' + $('input[name="only_search_simlarYear"]').is(':checked') +
+			 '&year_begin=' + $('input[name="year_begin"]').val() +
+			 '&year_end=' + $('input[name="year_end"]').val() +
 			 '&house_year=' + $("input[name=house_year]").val() +
 			 '&which_floor=' + $("input[name=which_floor]").val() +
 			 '&landsize_Ibuy=' + $('input[name=landsize_Ibuy]').val()
@@ -64,7 +65,17 @@
 							label: '按樓層每坪單價分佈（單位：萬）',
 							data: data_avgLandCost
 					}]
-				},
+				}, options: {
+    scales: {
+      yAxes: [{
+        ticks: {
+          beginAtZero: true,
+          min: 0,
+          stepSize: 5,
+        }
+      }]
+    }
+  }
 			});
 
 
@@ -77,7 +88,18 @@
 							label: '按樓層公設比分佈（單位：％）',
 							data: data_avgSharedPercent
 					}]
-				},      
+				},      options: {
+    scales: {
+      yAxes: [{
+        ticks: {
+          beginAtZero: true,
+          min: 0,
+          max: 100,
+          stepSize: 5,
+        }
+      }]
+    }
+  }
 			});
 
 		});
@@ -91,7 +113,14 @@
 			<h5 class="card-title">小丁看房神器（中古屋）</h5>
 			<h6 class="card-subtitle mb-2 text-muted">你做研究都要爬文獻了，那為什麼買房不用？</h6>
 		</div>
-
+			<div class="form-row">
+				<div class="col-2">調閱年份區間</div>
+				<div class="col">西元</div>
+				<div class="col"><input type='number' class="form-control"  name='year_begin' placeholder="西元年初" value="{{ dbInitVal['year_begin'] or 2018 }}" /></div>
+				<div class="col">至</div>
+				<div class="col"><input type='number' class="form-control"  name='year_end' placeholder="西元年末" value="{{dbInitVal['year_end'] or 2022 }}" /></div>
+				<div class="col">年</div>
+			</div>
 				<div class="form-row">
 					<div class="col-1.5">
 						<select name="city" class="custom-select" value>
@@ -127,11 +156,6 @@
 					<div class="col-1.5"><input type='number' class="form-control"  name='which_floor' placeholder="樓層" value="{{ dbInitVal['which_floor'] or '' }}" /></div>
 					<div class="col-1.5"><input type='number' class="form-control"  name='house_year' placeholder="屋齡" value="{{ dbInitVal['house_year'] or '' }}" /></div>
 				</div>
-
-				<div class="form-check form-switch">
-					<input class="form-check-input" type="checkbox"  name="only_search_simlarYear" {{'checked' if dbInitVal['only_same_year'] else ''}}>
-					<label class="form-check-label" for="flexSwitchCheckChecked">僅搜尋屋齡相似的物件</label>
-				</div>
 				<p>若不須篩選該項條件，將其欄位留空即可。</p>
 				<button type='button' class="form-control btn btn-primary" onclick=search()>聽話！讓小丁看看！</button>
 		<!-- 房價分析綜合評估面板 -->
@@ -148,18 +172,18 @@
 			 </button>
 		  </h5>
 		</div>
-		<div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion">
+		<div id="collapseFour" class="collapse {% if content|length < 1 %}show{%endif%}" aria-labelledby="headingFour" data-parent="#accordion">
 			<div class="card-body">
-				此專案為公益性質免費在線中古屋房價分析工具 :)<br>
-				程式碼完全透明並開源於 github.com/aaaddress1/buyHouseAnalyzer<br>
-				若使用上有任何計算疏漏或者功能建議都歡迎 發PR 提 Issue 或來信 aaaddress1@chroot.org<br><br>
-				若使用喜歡，也歡迎各位乾爹乾媽打賞抖內幫繳伺服器租賃費用 QQ<br>
 				<a href="https://p.opay.tw/9F9ik"><img src="https://payment.opay.tw/Content/themes/WebStyle201404/images/allpay.png" /></a>
+				<br>
+				此專案為公益性質免費在線中古屋房價分析工具 :)<br>
+				程式碼完全透明並開源於 <a href="http://github.com/aaaddress1/buyHouseAnalyzer">aaaddress1/buyHouseAnalyzer</a><br>
+				若使用上有任何計算疏漏或者功能建議都歡迎 發PR 提 Issue 或來信 aaaddress1@chroot.org<br>
+				歡迎各位大佬打賞小額支持伺服器租賃費用，目前只敢開 Digital Ocean 低規主機 QQ<br>
 		  </div>
 		</div>
 	 </div>
-	 
-
+	
 			<div class="card">
 				<div class="card-header" id="headingOne">
 				  <h5 class="mb-0">
@@ -169,47 +193,51 @@
 				  </h5>
 				</div>
 		  
-				<div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+				<div id="collapseOne" class="collapse {% if content|length > 0 %}show{%endif%}" aria-labelledby="headingOne" data-parent="#accordion">
 				  <div class="card-body">
 					 {% if content|length > 0 %}
-							 {% if not analyzeResult %}
-								 輸入想分析的物件讓推理王小丁分析一下，等等再跟你說 :)
-							 {% else %}
-									 小丁驚訝的發現！！！
-									 <br>
-									 實價登錄成交最低樓層為 {{ analyzeResult['lowest_floorInfo'][0] }}樓，其平均每坪 {{ '%.2f' | format(analyzeResult['lowest_floorInfo'][1]|float) }} 萬元
-									 <br>
-									 實價登錄成交最高樓層為 {{ analyzeResult['highest_floorInfo'][0] }}樓，其平均每坪 {{ '%.2f' | format(analyzeResult['highest_floorInfo'][1]|float) }} 萬元
-									 <br>
-									 意味著每增加一層樓，每坪單價便須增加 {{ analyzeResult['perFloor_addMoney'] }} 元新台幣！
-									 <br><br>
-									 
-									 {% if dbInitVal['landsize_Ibuy'] and dbInitVal['which_floor'] %}
-											 假設您現在想買位於 {{dbInitVal['which_floor']}} 樓 {{dbInitVal['landsize_Ibuy']}} 坪的中古屋...
-											 <br>
-											 那麼小丁推測此條件之房屋底價為： {{dbInitVal['landsize_Ibuy']}}坪 * ( {{'%.2f'|format(analyzeResult['lowest_floorInfo'][1]|float)}}萬 + {{analyzeResult['perFloor_addMoney']}}元 * {{ dbInitVal['which_floor'] - analyzeResult['lowest_floorInfo'][0] }}個樓層差 ) = {{ '%.2f' | format(dbInitVal['landsize_Ibuy'] * ( analyzeResult['lowest_floorInfo'][1]*10000  + analyzeResult['perFloor_addMoney']  * (dbInitVal['which_floor'] - analyzeResult['lowest_floorInfo'][0] ))/10000 | float)}} 萬元總價唷！
-											 <br>
-											 您所搜索的房屋條件來說，平均單價為每坪 {{ analyzeResult['avg_landCost'] }} 萬元，因此 {{dbInitVal['landsize_Ibuy']}}坪 的房子均價應該在 {{ '%.2f'|format(analyzeResult['avg_landCost'] * dbInitVal['landsize_Ibuy']|float) }}萬總價。
-											 <br><br>
-											 小丁還發現了有個住在 {{ analyzeResult['richest_buyerInfo'][0] }} 樓的盤子買到最高價每坪 {{ '%.2f'| format(analyzeResult['richest_buyerInfo'][1]|float) }} 萬元
-											 <br>
 
-											 因此賣家心底的價格（即實價登錄最高價）應該至少要 {{dbInitVal['landsize_Ibuy']}}坪 * {{ '%.2f'| format(analyzeResult['richest_buyerInfo'][1]|float) }} = 總價 {{ '%.2f'| format(analyzeResult['richest_buyerInfo'][1]*dbInitVal['landsize_Ibuy']|float) }} 萬元才願意賣唷QQ
-									 
-									 {% endif %}
-									 <br><br>
-									<h6>註1：能成交的才是好價格、本分析僅供參考，實際議價成交價格可能會有所出入。</h5>
-									<h6>註2：本分析資料來源內政部實價登錄，並未像實價登錄2.0一樣將極端買賣價隱藏、而是全部顯示。</h5>
-							 {% endif %}
- 
+							小丁驚訝的發現！！！
+							<br>
+							實價登錄成交最低樓層為 {{ analyzeResult['lowest_floorInfo'][0] }}樓，其平均每坪 {{ '%.2f' | format(analyzeResult['lowest_floorInfo'][1]|float) }} 萬元
+							<br>
+							實價登錄成交最高樓層為 {{ analyzeResult['highest_floorInfo'][0] }}樓，其平均每坪 {{ '%.2f' | format(analyzeResult['highest_floorInfo'][1]|float) }} 萬元
+							<br>
+							意味著每增加一層樓，每坪單價便須增加 {{ analyzeResult['perFloor_addMoney'] }} 元新台幣！
+							<br><br>
+							
+							{% if dbInitVal['landsize_Ibuy'] and dbInitVal['which_floor'] %}
+									假設您現在想買位於 {{dbInitVal['which_floor']}} 樓 {{dbInitVal['landsize_Ibuy']}} 坪的中古屋...
+									<br>
+									那麼小丁推測此條件之房屋底價為： {{dbInitVal['landsize_Ibuy']}}坪 * ( {{'%.2f'|format(analyzeResult['lowest_floorInfo'][1]|float)}}萬 + {{analyzeResult['perFloor_addMoney']}}元 * {{ dbInitVal['which_floor'] - analyzeResult['lowest_floorInfo'][0] }}個樓層差 ) = {{ '%.2f' | format(dbInitVal['landsize_Ibuy'] * ( analyzeResult['lowest_floorInfo'][1]*10000  + analyzeResult['perFloor_addMoney']  * (dbInitVal['which_floor'] - analyzeResult['lowest_floorInfo'][0] ))/10000 | float)}} 萬元總價唷！
+									<br>
+									您所搜索的房屋條件來說，平均單價為每坪 {{ analyzeResult['avg_landCost'] }} 萬元，因此 {{dbInitVal['landsize_Ibuy']}}坪 的房子均價應該在 {{ '%.2f'|format(analyzeResult['avg_landCost'] * dbInitVal['landsize_Ibuy']|float) }}萬總價。
+									<br>
+									銀行估值最高總價應為 {{ '%.2f'|format(analyzeResult['avg_landCost'] * dbInitVal['landsize_Ibuy'] * 1.15|float) }} 萬元。
+									<br><br>
+									小丁還發現了有個住在 {{ analyzeResult['richest_buyerInfo'][0] }} 樓的盤子買到最高價每坪 {{ '%.2f'| format(analyzeResult['richest_buyerInfo'][1]|float) }} 萬元
+									<br>
+
+									因此賣家心底的價格（即實價登錄最高價）應該至少要 {{dbInitVal['landsize_Ibuy']}}坪 * {{ '%.2f'| format(analyzeResult['richest_buyerInfo'][1]|float) }} = 總價 {{ '%.2f'| format(analyzeResult['richest_buyerInfo'][1]*dbInitVal['landsize_Ibuy']|float) }} 萬元才願意賣唷QQ
+							
+							{% endif %}
+							<br><br>
+						<h6>註1：能成交的才是好價格、本分析僅供參考，實際議價成交價格可能會有所出入。</h5>
+						<h6>註2：本分析資料來源內政部實價登錄，並未像實價登錄2.0一樣將極端買賣價隱藏、而是全部顯示。</h5>
+
 					 {% else %}
-					 房屋篩選條件設定太嚴苛惹，小丁找不到近三年內的結果 :(
+					 快輸入你想購買ㄉ房屋條件來分析議價空間ㄅ :)
+					 <br>
+					 房屋篩選條件設定太嚴苛ㄉ話小丁可能會搜尋不到結果唷 QQ
 					 {% endif %}
 				  </div>
 				</div>
 			 </div>
 
-			 <div class="card">
+
+			{% if content|length > 0 %}
+
+			<div class="card">
 				<div class="card-header" id="headingTwo">
 				  <h5 class="mb-0">
 					 <button class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
@@ -221,15 +249,14 @@
 					<div class="card-body">
 						
 						<div class="canvas-container">
-						<canvas id="chart" class="cv" width="400" height="300"></canvas> 
-						<canvas id="chart1" class="cv" width="400" height="300"></canvas> 
+						<canvas id="chart" class="cv" width="600" height="400"></canvas> 
+						<canvas id="chart1" class="cv" width="600" height="400"></canvas> 
 					</div>
 
 				  </div>
 				</div>
 			 </div>
 
-			{% if content|length > 0 %}
 			<div class="card">
 			  <div class="card-header" id="headingThree">
 				 <h5 class="mb-0">

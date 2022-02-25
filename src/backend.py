@@ -10,28 +10,25 @@ def hello_world():
     houseAddr = request.args.get('houseAddr')
     district = request.args.get('district')
     which_floor = int(request.args.get('which_floor')) if request.args.get('which_floor') else None
-    if request.args.get('landsize_Ibuy'):
-        landsize_Ibuy = float(request.args.get('landsize_Ibuy'))
-    else:
-        landsize_Ibuy = None
-    search_similar_year = "true" == (request.args.get('only_same_year'))
+    landsize_Ibuy = float(request.args.get('landsize_Ibuy'))  if request.args.get('landsize_Ibuy') else None
+    house_year = int(request.args.get('house_year')) if request.args.get('house_year') else None
+    
+    year_range = range(1, 200) # 民國一年～兩百年
 
-    if request.args.get('house_year'):
-        house_year = int(request.args.get('house_year'))
-        house_year = house_year if search_similar_year else None
-    else:
-        house_year = None
+    if request.args.get('year_begin') and request.args.get('year_end'):
+        year_range = range(int(request.args.get('year_begin')) -1911, int(request.args.get('year_end'))- 1911)
+
 
     city = request.args.get('city')
     if not city or len(city) < 1: city = '臺北市'
     user_input_record = {
         'houseAddr':houseAddr, 'district':district, 'city':city, 'which_floor': which_floor,
-        'house_year': house_year, 'only_same_year': search_similar_year, 'landsize_Ibuy':landsize_Ibuy
+        'house_year': house_year, 'landsize_Ibuy':landsize_Ibuy, 'year_begin':request.args.get('year_begin'), 'year_end': request.args.get('year_end')
     }
 
     city_symbol = analyzer.country_map[city.replace('台', '臺')]
     if houseAddr or district:
-        _, __, analyzeResult = analyzer.fetchHouseInfo(city_symbol, houseAddr, district, which_floor, house_year)
+        _, __, analyzeResult = analyzer.fetchHouseInfo(city_symbol, houseAddr, district, which_floor, house_year, year_range)
         return render_template('index.html', labels=_, content=(__), dbInitVal = user_input_record, analyzeResult = analyzeResult)
     else:
         return render_template('index.html', labels=[], content={}, dbInitVal = user_input_record, analyzeResult = {})
