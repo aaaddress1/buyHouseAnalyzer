@@ -28,7 +28,7 @@ def get_floor_byCNstr(in_szChineseFloor):
 				tmp = tmp * 10 + tmp_num
 			digit_num += 1
 			result = result + tmp + billion
-			return result
+		return result
 	except:
 		return None
 
@@ -62,6 +62,8 @@ country_map = {
 # 歷年資料夾
 dirs = [d for d in os.listdir() if d[:4] == 'real']
 
+# 原版快取設計效能超讚，但 Digital Ocean 便宜主機記憶體不夠會炸開... 暫時棄用，囧
+'''
 dfs_db = {}
 for city_symbol in ['a','f']:# 'b', 'c', 'd', 'e',  ]:#'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q', 't', 'u', 'v', 'w', 'x']:
 	dfs = []
@@ -71,12 +73,19 @@ for city_symbol in ['a','f']:# 'b', 'c', 'd', 'e',  ]:#'g', 'h', 'i', 'j', 'k', 
 			df['Q'] = d[-1]
 			dfs.append(df.iloc[1:])
 		dfs_db[city_symbol] = dfs
-			
-	
+'''
 
 # Taipei = "a"
-def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor):
-	df = pd.concat(dfs_db[in_city_symbol], sort=True)
+def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor, in_houseOld):
+
+	dfs = []
+	for d in dirs:
+		if os.path.isfile(os.path.join(d, f'{in_city_symbol}_lvr_land_a.csv')):
+			df = pd.read_csv(os.path.join(d,f'{in_city_symbol}_lvr_land_a.csv'), index_col=False)
+			df['Q'] = d[-1]
+			dfs.append(df.iloc[1:])
+
+	df = pd.concat(dfs, sort=True)
 
 	# 平方公尺換成坪
 	df['單價元平方公尺'] = df['單價元平方公尺'].astype(float)
@@ -92,6 +101,10 @@ def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor):
 	if in_district: df = df[ df['鄉鎮市區'].str.contains(in_district, na=False) ]
 	df = df[ df['主建物面積'] >= 1 ]
 	ret = {}
+	if  len(df) == 0: # not found?
+		return ['成交日期', '購買物件', '格局', '樓層', '屋齡', '主建物坪數', '公設比', '總價', '每坪價格（扣除車位）', '備註'], ret, {'lowest_floorInfo': [0,0], 'highest_floorInfo':[0,0], 'perFloor_addMoney': 0} 
+
+	most_rich_buyerInfo = [0, 0] # [floor, 每坪買多少？]
 	for indx in range(len(df)):
 		curr_row = df.iloc[indx]
 
@@ -101,16 +114,16 @@ def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor):
 			carcar_moneycost = int(int(curr_row['車位總價元']) /10000)
 
 			# 主建物資訊
-			bought_land_size = float(curr_row['建物移轉總面積平方公尺']) * 0.3025 - carcar_land_used
-			bought_shared_land_size = float(curr_row['建物移轉總面積平方公尺']) * 0.3025 - (float(curr_row['主建物面積']) + float(curr_row['附屬建物面積']) + float(curr_row['陽台面積']))* 0.3025
-			
+			bought_land_size = round(( float(curr_row['主建物面積']) +float(curr_row['附屬建物面積']) + float(curr_row['陽台面積']) )* 0.3025, 2)
+			bought_shared_land_size = float(curr_row['建物移轉總面積平方公尺']) * 0.3025 -bought_land_size
+			bought_shared_land_percent = round((1-(float(curr_row['主建物面積']) / (float(curr_row['建物移轉總面積平方公尺'])-float(curr_row['車位移轉總面積(平方公尺)']))))*100, 2)
 			if isinstance(curr_row['移轉層次'], str):
 				which_floor = curr_row['移轉層次'][:-1]
 			elif isinstance(curr_row['移轉層次'], str):
 				which_floor = int(curr_row['移轉層次']) if curr_row['移轉層次'] != math.nan else 0
 
 			which_floor = get_floor_byCNstr(which_floor)
-			total_moneycost = int(curr_row['總價元']) / 10000
+			total_moneycost = int(int(curr_row['總價元']) / 10000)
 			
 			
 			# 處理交易日期民國轉西元
@@ -121,33 +134,70 @@ def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor):
 
 			# 屋齡
 			if isinstance(curr_row['建築完成年月'], str):
-				house_so_old = f"{datetime.date.today().year - (int(curr_row['建築完成年月'][:-4]) + 1911)}年"
+				house_num_old = datetime.date.today().year - (int(curr_row['建築完成年月'][:-4]) + 1911)
+				house_so_old = f"{house_num_old}年"
+				if in_houseOld != None and not house_num_old in range(in_houseOld-5, in_houseOld+6):
+					continue
 			else:
 				house_so_old = "不詳"
+				if in_houseOld:
+					continue
 
 
 			# 每坪數單價
-			try:
-				single_land_cost = float(curr_row['單價元坪'] / 10000) 
+			try: 
+				single_land_cost = round(float(curr_row['單價元坪'] / 10000), 2)
+				if math.isnan( curr_row['單價元坪'] ):
+					conti
 			except:
 				single_land_cost = '不詳'
+				continue
+			
+			
 
 			# 濾掉地下室、土地購買、一樓店面
-			if which_floor and bought_land_size > 0 and curr_row['建物現況格局-房'] != '0':
+			if which_floor and which_floor > 1 and bought_land_size > 0 and curr_row['建物現況格局-房'] != '0':
 
-				if not which_floor in ret: ret[which_floor] = []
-				ret[which_floor].append([ 
+				if single_land_cost >= most_rich_buyerInfo[1]:
+					most_rich_buyerInfo = [which_floor, single_land_cost]
+
+				if not which_floor in ret: ret[which_floor] = {'perland_avgCost': 0, 'currFloor_avgSharedPercent':0, 'currFloorDB': []}
+				ret[which_floor]['currFloorDB'].append([ 
 					pp_bought_datetime, 
 					curr_row['土地位置建物門牌'],
 					f"{curr_row['建物現況格局-房']}房{curr_row['建物現況格局-廳']}廳{curr_row['建物現況格局-衛']}衛/{curr_row['建物現況格局-隔間']}夾層",
 					which_floor,
 					house_so_old, 
 					bought_land_size, 
-					f"{int(bought_shared_land_size * 100/( float(curr_row['建物移轉總面積平方公尺']) * 0.3025))}%",
-					total_moneycost, 
-					single_land_cost,
+					f"{bought_shared_land_percent}%",
+					f"{total_moneycost}萬", 
+					f"{single_land_cost}萬",
 					f"含車位{carcar_moneycost}萬（{carcar_land_used:.2f}坪）"if carcar_moneycost >= 1 else ''
 				])
+				ret[which_floor]['perland_avgCost'] += int(single_land_cost)
+				ret[which_floor]['currFloor_avgSharedPercent'] += int(bought_shared_land_percent)
 		except Exception as ex:
-			raise (ex)
-	return ['成交日期', '購買物件', '房/廳/衛/夾層', '樓層', '屋齡', '主建物坪數', '公設比', '總價（萬）', '每坪價格（扣除車位）/萬', '備註'], ret
+			print(ex)
+	if  len(ret) == 0: # not found?
+		return ['成交日期', '購買物件', '格局', '樓層', '屋齡', '主建物坪數', '公設比', '總價', '每坪價格（扣除車位）', '備註'], ret, {'lowest_floorInfo': [0,0], 'highest_floorInfo':[0,0], 'perFloor_addMoney': 0} 
+
+	avg_landCost = 0
+	for indx in ret:
+		ret[indx]['perland_avgCost'] /= len(ret[indx]['currFloorDB'])
+		ret[indx]['currFloor_avgSharedPercent'] /= len(ret[indx]['currFloorDB'])
+		avg_landCost += ret[indx]['perland_avgCost'] 
+
+	avg_landCost = int(avg_landCost / len(ret))
+	lowest_floorInfo, highest_floorInfo = [1000000, 0], [-1000000, 0]  # [ floor, perland_cost? ]
+	lowest_floorIndx = sorted(ret.keys())[0]
+	lowest_floorInfo = [lowest_floorIndx, ret[lowest_floorIndx]['perland_avgCost']]
+	highest_floorIndx = sorted(ret.keys())[-1]
+	highest_floorInfo = [highest_floorIndx, ret[highest_floorIndx]['perland_avgCost']]
+
+	analyzeResult = { 
+		'avg_landCost': avg_landCost,
+		'lowest_floorInfo': lowest_floorInfo, 
+		'highest_floorInfo': highest_floorInfo, 
+		'richest_buyerInfo': most_rich_buyerInfo,
+		'perFloor_addMoney': int((highest_floorInfo[1] - lowest_floorInfo[1]) / (highest_floorInfo[0] - lowest_floorInfo[0] + 0.001) * 10000) }
+	return ['成交日期', '購買物件', '格局', '樓層', '屋齡', '主建物坪數', '公設比', '總價', '每坪價格（扣除車位）', '備註'], ret, analyzeResult
