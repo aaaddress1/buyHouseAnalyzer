@@ -1,490 +1,134 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
   <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8" />
-    <!-- Bootstrap CSS -->
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-      crossorigin="anonymous"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
-    <link
-      href="https://fonts.googleapis.com/css?family=Noto+Sans+TC&display=swap"
-      rel="stylesheet"
-    />
-    <script
-      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-      crossorigin="anonymous"
-    ></script>
     <title>小丁線上看房 [v1.0]</title>
-    <style>
-      .canvas-container {
-        display: flex;
-        width: 40%;
-      }
-
-      .cv {
-        width: 100%;
-        height: 100%;
-      }
-    </style>
-    <script>
-      function search() {
-        location.replace(
-          '/?city='                                         +
-          $("select[name=city]").val()                      +
-          '&district=' + $("input[name=district]").val()    +
-          '&houseAddr=' + $("input[name=house_local]").val()+
-          '&year_begin=' + $('input[name="year_begin"]').val() +
-          '&year_end=' + $('input[name="year_end"]').val() +
-          '&house_year=' + $("input[name=house_year]").val() +
-          '&which_floor=' + $("input[name=which_floor]").val() +
-          '&landsize_Ibuy=' + $('input[name=landsize_Ibuy]').val()
-        );
-      }
-
-
-      window.onload = (function() {
-        vv = "{{ dbInitVal['city'] or 臺北市 }}"
-        $("select[name=city]").val(vv)
-
-        var ctx = document.getElementById('chart').getContext('2d');
-        var ctx1 = document.getElementById('chart1').getContext('2d');
-        content = JSON.parse(`{{content|tojson}}`);
-
-        data_avgLandCost = [];
-        data_avgSharedPercent = [];
-        data_floorLabels = [];
-        {% for which_floor in content|sort %}
-        data_floorLabels.push("{{which_floor}}樓");
-        data_avgLandCost.push({{ content[which_floor]['perland_avgCost'] }});
-        data_avgSharedPercent.push({{ content[which_floor]['currFloor_avgSharedPercent'] }});
-        {% endfor %}
-
-
-        var chart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: data_floorLabels,
-            datasets: [{
-              label: '按樓層每坪單價分佈（單位：萬）',
-              data: data_avgLandCost
-            }]
-          }, options: {
-            scales: {
-              yAxes: [{
-                ticks: {
-                  beginAtZero: true,
-                  min: 0,
-                  stepSize: 5,
-                }
-              }]
-            }
-          }
-        });
-
-
-
-        var chart = new Chart(ctx1, {
-          type: 'line',
-          data: {
-            labels: data_floorLabels,
-            datasets: [{
-              label: '按樓層公設比分佈（單位：％）',
-              data: data_avgSharedPercent
-            }]
-          },      options: {
-            scales: {
-              yAxes: [{
-                ticks: {
-                  beginAtZero: true,
-                  min: 0,
-                  max: 100,
-                  stepSize: 5,
-                }
-              }]
-            }
-          }
-        });
-
-      });
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="https://unpkg.com/vue@3"></script>
   </head>
   <body>
-    <div class="container" style="max-width: 100%">
-      <br />
-      <!-- 使用者輸入面板 -->
-      <div class="card">
-        <h5 class="card-title">小丁看房神器（中古屋）</h5>
-        <h6 class="card-subtitle mb-2 text-muted">
-          你做研究都要爬文獻了，那為什麼買房不用？
-        </h6>
-      </div>
-      <div class="form-row">
-        <div class="col-2">調閱年份區間</div>
-        <div class="col">西元</div>
-        <div class="col">
-          <input
-            type="number"
-            class="form-control"
-            name="year_begin"
-            placeholder="西元年初"
-            value="{{ dbInitVal['year_begin'] or 2018 }}"
-          />
-        </div>
-        <div class="col">至</div>
-        <div class="col">
-          <input
-            type="number"
-            class="form-control"
-            name="year_end"
-            placeholder="西元年末"
-            value="{{dbInitVal['year_end'] or 2022 }}"
-          />
-        </div>
-        <div class="col">年</div>
-      </div>
-      <div class="form-row">
-        <div class="col-1.5">
-          <select name="city" class="custom-select" value>
-            <option value="臺北市">臺北市</option>
-            <option value="臺中市">臺中市</option>
-            <option value="基隆市">基隆市</option>
-            <option value="臺南市">臺南市</option>
-            <option value="高雄市">高雄市</option>
-            <option value="新北市">新北市</option>
-            <option value="宜蘭縣">宜蘭縣</option>
-            <option value="桃園市">桃園市</option>
-            <option value="嘉義市">嘉義市</option>
-            <option value="新竹縣">新竹縣</option>
-            <option value="苗栗縣">苗栗縣</option>
-            <option value="南投縣">南投縣</option>
-            <option value="彰化縣">彰化縣</option>
-            <option value="新竹市">新竹市</option>
-            <option value="雲林縣">雲林縣</option>
-            <option value="嘉義縣">嘉義縣</option>
-            <option value="屏東縣">屏東縣</option>
-            <option value="花蓮縣">花蓮縣</option>
-            <option value="臺東縣">臺東縣</option>
-            <option value="金門縣">金門縣</option>
-            <option value="馬公市">馬公市</option>
-          </select>
-        </div>
-        <div class="col-2">
-          <input
-            type="text"
-            class="form-control"
-            name="district"
-            placeholder="哪個區"
-            ,
-            value="{{ dbInitVal['district'] or '' }}"
-          />
-        </div>
-        <div class="col">
-          <input
-            type="text"
-            class="form-control"
-            name="house_local"
-            placeholder="地址街道地址（不包含巷弄樓層）"
-            value="{{ dbInitVal['houseAddr'] or '' }}"
-          />
-        </div>
-      </div>
-      <br />
-      <div class="form-row">
-        <div class="col">
-          <input
-            type="number"
-            step="0.01"
-            class="form-control"
-            name="landsize_Ibuy"
-            placeholder="你想買的物件坪數"
-            value="{{ dbInitVal['landsize_Ibuy'] or '' }}"
-          />
-        </div>
-        <div class="col-1.5">
-          <input
-            type="number"
-            class="form-control"
-            name="which_floor"
-            placeholder="樓層"
-            value="{{ dbInitVal['which_floor'] or '' }}"
-          />
-        </div>
-        <div class="col-1.5">
-          <input
-            type="number"
-            class="form-control"
-            name="house_year"
-            placeholder="屋齡"
-            value="{{ dbInitVal['house_year'] or '' }}"
-          />
-        </div>
-      </div>
-      <p>若不須篩選該項條件，將其欄位留空即可。</p>
-      <button
-        type="button"
-        class="form-control btn btn-primary"
-        onclick="search()"
-      >
-        聽話！讓小丁看看！
-      </button>
-      <!-- 房價分析綜合評估面板 -->
-      <br />
-      <br />
-      <div id="accordion">
-        <div class="card">
-          <div class="card-header" id="headingFour">
-            <h5 class="mb-0">
-              <button
-                class="btn btn-link"
-                data-toggle="collapse"
-                data-target="#collapseFour"
-                aria-expanded="true"
-                aria-controls="collapseFour"
-              >
-                關於此專案
-              </button>
-            </h5>
+    <!-- Header -->
+    <header class=" top-0 z-40 w-full backdrop-blur flex-none transition-colors duration-500 lg:z-50 lg:border-b lg:border-slate-900/10 dark:border-slate-50/[0.06] bg-white supports-backdrop-blur:bg-white/95 dark:bg-slate-900/75">
+      <div class="max-w-8xl mx-auto">
+        <div class="py-4 border-b border-slate-900/10 lg:px-8 lg:border-0 dark:border-slate-300/10 mx-4 lg:mx-0">
+          <div class="relative flex items-center">
+            <h1 class="font-bold">小丁看房神器（中古屋）</h1>
+            <span class="ml-3 text-xs leading-5 font-medium text-sky-600 dark:text-sky-400 bg-sky-400/10 rounded-full py-1 px-3 hidden xl:flex items-center hover:bg-sky-400/20">你做研究都要爬文獻了，那為什麼買房不用？</span>
           </div>
-          <div
-            id="collapseFour"
-            class="collapse {% if content|length < 1 %}show{%endif%}"
-            aria-labelledby="headingFour"
-            data-parent="#accordion"
-          >
-            <div class="card-body">
-              <a href="https://p.opay.tw/9F9ik"
-                ><img
-                  src="https://payment.opay.tw/Content/themes/WebStyle201404/images/allpay.png"
-              /></a>
-              <br />
-              此專案為公益性質免費在線中古屋房價分析工具 :)<br />
-              程式碼完全透明並開源於
-              <a href="http://github.com/aaaddress1/buyHouseAnalyzer"
-                >aaaddress1/buyHouseAnalyzer</a
-              ><br />
-              若使用上有任何計算疏漏或者功能建議都歡迎 發PR 提 Issue 或來信
-              aaaddress1@chroot.org<br />
-              歡迎各位大佬打賞小額支持伺服器租賃費用，目前只敢開 Digital Ocean
-              低規主機 QQ<br />
+        </div>
+      </div>
+    </header>
+
+    <!-- Application -->
+    <div class="max-w-8xl mt-8 mx-auto px-4 sm:px-6 md:px-8">
+      <div id="app">
+        <!-- Search Form -->
+        <div>
+          <!-- Input -->
+          <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/3">
+              <label class="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+                調閱年份
+              </label>
+            </div>
+            <div class="md:w-2/3">
+              <input v-model="yearBegin" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-1/3 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" id="inline-full-name" type="text">
+              到
+              <input v-model="yearEnd" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-1/3 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" id="inline-full-name" type="text">
+            </div>
+          </div>
+          <!-- Input -->
+          <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/3">
+              <label class="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+                位置
+              </label>
+            </div>
+            <div class="md:w-2/3">
+              <select v-model="city" name="city" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500">
+                <option value="臺北市">臺北市</option>
+                <option value="臺中市">臺中市</option>
+                <option value="基隆市">基隆市</option>
+                <option value="臺南市">臺南市</option>
+                <option value="高雄市">高雄市</option>
+                <option value="新北市">新北市</option>
+                <option value="宜蘭縣">宜蘭縣</option>
+                <option value="桃園市">桃園市</option>
+                <option value="嘉義市">嘉義市</option>
+                <option value="新竹縣">新竹縣</option>
+                <option value="苗栗縣">苗栗縣</option>
+                <option value="南投縣">南投縣</option>
+                <option value="彰化縣">彰化縣</option>
+                <option value="新竹市">新竹市</option>
+                <option value="雲林縣">雲林縣</option>
+                <option value="嘉義縣">嘉義縣</option>
+                <option value="屏東縣">屏東縣</option>
+                <option value="花蓮縣">花蓮縣</option>
+                <option value="臺東縣">臺東縣</option>
+                <option value="金門縣">金門縣</option>
+                <option value="馬公市">馬公市</option>
+              </select>
+              <input type="text" v-model="district" name="district" placeholder="行政區" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" />
+              <input type="text" v-model="addr" name="house_local" placeholder="地址街道地址（不包含巷弄樓層）" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-1/3 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" />
+            </div>
+          </div>
+          <!-- Input -->
+          <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/3"></div>
+            <div class="md:w-2/3">
+              <input type="number" v-model="landSize" step="0.01" name="landsize_Ibuy" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" placeholder="你想買的物件坪數" />
+              <input type="number" v-model="floor" name="which_floor" placeholder="樓層" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" />
+              <input type="number" v-model="houseYear" name="house_year" placeholder="屋齡" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" />
+            </div>
+          </div>
+          <!-- Notice -->
+          <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/3"></div>
+            <div class="md:w-2/3">
+              <p class="text-gray-500 text-sm">若不須篩選該項條件，將其欄位留空即可。</p>
+            </div>
+          </div>
+          <!-- Submit -->
+          <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/3"></div>
+            <div class="md:w-2/3">
+              <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" @click="onSearch">聽話！讓小丁看看！</button>
             </div>
           </div>
         </div>
-
-        <div class="card">
-          <div class="card-header" id="headingOne">
-            <h5 class="mb-0">
-              <button
-                class="btn btn-link"
-                data-toggle="collapse"
-                data-target="#collapseOne"
-                aria-expanded="true"
-                aria-controls="collapseOne"
-              >
-                小丁線上點評
-              </button>
-            </h5>
-          </div>
-
-          <div
-            id="collapseOne"
-            class="collapse {% if content|length > 0 %}show{%endif%}"
-            aria-labelledby="headingOne"
-            data-parent="#accordion"
-          >
-            <div class="card-body">
-              {% if content|length > 0 %} 小丁驚訝的發現！！！
-              <br />
-              實價登錄成交最低樓層為 {{ analyzeResult['lowest_floorInfo'][0]
-              }}樓，其平均每坪 {{ '%.2f' |
-              format(analyzeResult['lowest_floorInfo'][1]|float) }} 萬元
-              <br />
-              實價登錄成交最高樓層為 {{ analyzeResult['highest_floorInfo'][0]
-              }}樓，其平均每坪 {{ '%.2f' |
-              format(analyzeResult['highest_floorInfo'][1]|float) }} 萬元
-              <br />
-              意味著每增加一層樓，每坪單價便須增加 {{
-              analyzeResult['perFloor_addMoney'] }} 元新台幣！
-              <br /><br />
-
-              {% if dbInitVal['landsize_Ibuy'] and dbInitVal['which_floor'] %}
-              假設您現在想買位於 {{dbInitVal['which_floor']}} 樓
-              {{dbInitVal['landsize_Ibuy']}} 坪的中古屋...
-              <br />
-              那麼小丁推測此條件之房屋底價為： {{dbInitVal['landsize_Ibuy']}}坪
-              * (
-              {{'%.2f'|format(analyzeResult['lowest_floorInfo'][1]|float)}}萬 +
-              {{analyzeResult['perFloor_addMoney']}}元 * {{
-              dbInitVal['which_floor'] - analyzeResult['lowest_floorInfo'][0]
-              }}個樓層差 ) = {{ '%.2f' | format(dbInitVal['landsize_Ibuy'] * (
-              analyzeResult['lowest_floorInfo'][1]*10000 +
-              analyzeResult['perFloor_addMoney'] * (dbInitVal['which_floor'] -
-              analyzeResult['lowest_floorInfo'][0] ))/10000 | float)}}
-              萬元總價唷！
-              <br />
-              您所搜索的房屋條件來說，平均單價為每坪 {{
-              analyzeResult['avg_landCost'] }} 萬元，因此
-              {{dbInitVal['landsize_Ibuy']}}坪 的房子均價應該在 {{
-              '%.2f'|format(analyzeResult['avg_landCost'] *
-              dbInitVal['landsize_Ibuy']|float) }}萬總價。
-              <br />
-              銀行估值最高總價應為 {{
-              '%.2f'|format(analyzeResult['avg_landCost'] *
-              dbInitVal['landsize_Ibuy'] * 1.15|float) }} 萬元。
-              <br /><br />
-              小丁還發現了有個住在 {{ analyzeResult['richest_buyerInfo'][0] }}
-              樓的盤子買到最高價每坪 {{ '%.2f'|
-              format(analyzeResult['richest_buyerInfo'][1]|float) }} 萬元
-              <br />
-
-              因此賣家心底的價格（即實價登錄最高價）應該至少要
-              {{dbInitVal['landsize_Ibuy']}}坪 * {{ '%.2f'|
-              format(analyzeResult['richest_buyerInfo'][1]|float) }} = 總價 {{
-              '%.2f'|
-              format(analyzeResult['richest_buyerInfo'][1]*dbInitVal['landsize_Ibuy']|float)
-              }} 萬元才願意賣唷QQ {% endif %}
-              <br /><br />
-              <h6>
-                註1：能成交的才是好價格、本分析僅供參考，實際議價成交價格可能會有所出入。
-              </h6>
-              <h6>
-                註2：本分析資料來源內政部實價登錄，並未像實價登錄2.0一樣將極端買賣價隱藏、而是全部顯示。
-              </h6>
-
-              {% else %} 快輸入你想購買ㄉ房屋條件來分析議價空間ㄅ :)
-              <br />
-              房屋篩選條件設定太嚴苛ㄉ話小丁可能會搜尋不到結果唷 QQ {% endif %}
-            </div>
-          </div>
-        </div>
-
-        {% if content|length > 0 %}
-
-        <div class="card">
-          <div class="card-header" id="headingTwo">
-            <h5 class="mb-0">
-              <button
-                class="btn btn-link"
-                data-toggle="collapse"
-                data-target="#collapseTwo"
-                aria-expanded="true"
-                aria-controls="collapseTwo"
-              >
-                坪數與公設綜合分析
-              </button>
-            </h5>
-          </div>
-          <div
-            id="collapseTwo"
-            class="collapse"
-            aria-labelledby="headingTwo"
-            data-parent="#accordion"
-          >
-            <div class="card-body">
-              <div class="canvas-container">
-                <canvas id="chart" class="cv" width="600" height="400"></canvas>
-                <canvas
-                  id="chart1"
-                  class="cv"
-                  width="600"
-                  height="400"
-                ></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header" id="headingThree">
-            <h5 class="mb-0">
-              <button
-                class="btn btn-link collapsed"
-                data-toggle="collapse"
-                data-target="#collapseThree"
-                aria-expanded="false"
-                aria-controls="collapseThree"
-              >
-                實價登錄分析
-              </button>
-            </h5>
-          </div>
-          <div
-            id="collapseThree"
-            class="collapse"
-            aria-labelledby="headingThree"
-            data-parent="#accordion"
-          >
-            <div class="card-body">
-              {% for which_floor in content|sort %}
-              <div class="panel-group" id="floor{{which_floor}}panel">
-                <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h4 class="panel-title">
-                      <a
-                        data-toggle="collapse"
-                        data-parent="#floor{{which_floor}}panel"
-                        href="#collapse{{which_floor}}"
-                      >
-                        樓層 #{{which_floor}} - 平均每坪 {{
-                        '%.2f'|format(content[which_floor]['perland_avgCost']|float)
-                        }} 萬元
-                      </a>
-                    </h4>
-                  </div>
-
-                  <div
-                    id="collapse{{which_floor}}"
-                    class="panel-collapse collapse"
-                  >
-                    <div class="panel-body">
-                      <table
-                        class="table table-condensed table-striped"
-                        id="floor_money_panel"
-                      >
-                        <thead>
-                          <tr>
-                            {% for l in labels %}
-                            <th>{{l}}</th>
-                            {% endfor %}
-                          </tr>
-                        </thead>
-
-                        <tbody>
-                          {% for curr_row in content[which_floor]['currFloorDB']
-                          %}
-                          <tr>
-                            {% for each_col in curr_row %}
-                            <td>{{ each_col }}</td>
-                            {% endfor %}
-                          </tr>
-                          {% endfor %}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-        </div>
-        {% endif %}
       </div>
     </div>
+
+    <script>
+      const app = Vue.createApp({
+        setup() {
+          const yearBegin = Vue.ref({{ dbInitVal['year_begin'] or 2018 }})
+          const yearEnd = Vue.ref({{ dbInitVal['year_end'] or 2022 }})
+          const city = Vue.ref('{{ dbInitVal['city'] or 臺北市 }}')
+          const district = Vue.ref('{{ dbInitVal['district'] or '' }}')
+          const addr = Vue.ref('{{ dbInitVal['houseAddr'] or '' }}')
+          const landSize = Vue.ref({{ dbInitVal['landsize_Ibuy'] or '' }})
+          const floor = Vue.ref({{ dbInitVal['which_floor'] or '' }})
+          const houseYear = Vue.ref({{ dbInitVal['house_year'] or '' }})
+
+          return {
+            yearBegin,
+            yearEnd,
+            city,
+            district,
+            addr,
+            landSize,
+            floor,
+            houseYear,
+            onSearch: () => {
+              location.replace(`/?city=${city.value}&district=${district.value || ''}&houseAddr=${addr.value || ''}&year_begin=${yearBegin.value}&year_end=${yearEnd.value}&house_year=${houseYear.value || ''}&which_floor=${floor.value || ''}&landsize_Ibuy=${landSize.value || ''}`);
+            }
+          }
+        }
+      })
+
+      app.mount('#app')
+    </script>
   </body>
 </html>
