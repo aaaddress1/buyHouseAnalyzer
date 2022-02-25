@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
   </head>
   <body>
     <!-- Header -->
@@ -21,83 +22,81 @@
     </header>
 
     <!-- Application -->
-    <div class="max-w-8xl mt-8 mx-auto px-4 sm:px-6 md:px-8">
-      <div id="app">
-        <!-- Search Form -->
-        <div>
-          <!-- Input -->
-          <div class="md:flex md:items-center mb-6">
-            <div class="md:w-1/3">
-              <label class="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
-                調閱年份
-              </label>
-            </div>
-            <div class="md:w-2/3">
-              <input v-model="yearBegin" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-1/3 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" id="inline-full-name" type="text">
-              到
-              <input v-model="yearEnd" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-1/3 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" id="inline-full-name" type="text">
-            </div>
+    <div id="app" class="max-w-8xl mt-8 mx-auto px-4 sm:px-6 md:px-8">
+      <!-- Search Form -->
+      <section>
+        <!-- Input -->
+        <div class="md:flex md:items-center mb-6">
+          <div class="md:w-1/3">
+            <label class="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+              調閱年份
+            </label>
           </div>
-          <!-- Input -->
-          <div class="md:flex md:items-center mb-6">
-            <div class="md:w-1/3">
-              <label class="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
-                位置
-              </label>
-            </div>
-            <div class="md:w-2/3">
-              <select v-model="city" name="city" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500">
-                <option value="臺北市">臺北市</option>
-                <option value="臺中市">臺中市</option>
-                <option value="基隆市">基隆市</option>
-                <option value="臺南市">臺南市</option>
-                <option value="高雄市">高雄市</option>
-                <option value="新北市">新北市</option>
-                <option value="宜蘭縣">宜蘭縣</option>
-                <option value="桃園市">桃園市</option>
-                <option value="嘉義市">嘉義市</option>
-                <option value="新竹縣">新竹縣</option>
-                <option value="苗栗縣">苗栗縣</option>
-                <option value="南投縣">南投縣</option>
-                <option value="彰化縣">彰化縣</option>
-                <option value="新竹市">新竹市</option>
-                <option value="雲林縣">雲林縣</option>
-                <option value="嘉義縣">嘉義縣</option>
-                <option value="屏東縣">屏東縣</option>
-                <option value="花蓮縣">花蓮縣</option>
-                <option value="臺東縣">臺東縣</option>
-                <option value="金門縣">金門縣</option>
-                <option value="馬公市">馬公市</option>
-              </select>
-              <input type="text" v-model="district" name="district" placeholder="行政區" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" />
-              <input type="text" v-model="addr" name="house_local" placeholder="地址街道地址（不包含巷弄樓層）" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-1/3 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" />
-            </div>
-          </div>
-          <!-- Input -->
-          <div class="md:flex md:items-center mb-6">
-            <div class="md:w-1/3"></div>
-            <div class="md:w-2/3">
-              <input type="number" v-model="landSize" step="0.01" name="landsize_Ibuy" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" placeholder="你想買的物件坪數" />
-              <input type="number" v-model="floor" name="which_floor" placeholder="樓層" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" />
-              <input type="number" v-model="houseYear" name="house_year" placeholder="屋齡" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" />
-            </div>
-          </div>
-          <!-- Notice -->
-          <div class="md:flex md:items-center mb-6">
-            <div class="md:w-1/3"></div>
-            <div class="md:w-2/3">
-              <p class="text-gray-500 text-sm">若不須篩選該項條件，將其欄位留空即可。</p>
-            </div>
-          </div>
-          <!-- Submit -->
-          <div class="md:flex md:items-center mb-6">
-            <div class="md:w-1/3"></div>
-            <div class="md:w-2/3">
-              <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" @click="onSearch">聽話！讓小丁看看！</button>
-            </div>
+          <div class="md:w-2/3">
+            <input v-model="yearBegin" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-1/3 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" id="inline-full-name" type="text">
+            到
+            <input v-model="yearEnd" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-1/3 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" id="inline-full-name" type="text">
           </div>
         </div>
-      </div>
+        <!-- Input -->
+        <div class="md:flex md:items-center mb-6">
+          <div class="md:w-1/3">
+            <label class="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+              位置
+            </label>
+          </div>
+          <div class="md:w-2/3">
+            <select v-model="city" name="city" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500">
+              <option value="臺北市">臺北市</option>
+              <option value="臺中市">臺中市</option>
+              <option value="基隆市">基隆市</option>
+              <option value="臺南市">臺南市</option>
+              <option value="高雄市">高雄市</option>
+              <option value="新北市">新北市</option>
+              <option value="宜蘭縣">宜蘭縣</option>
+              <option value="桃園市">桃園市</option>
+              <option value="嘉義市">嘉義市</option>
+              <option value="新竹縣">新竹縣</option>
+              <option value="苗栗縣">苗栗縣</option>
+              <option value="南投縣">南投縣</option>
+              <option value="彰化縣">彰化縣</option>
+              <option value="新竹市">新竹市</option>
+              <option value="雲林縣">雲林縣</option>
+              <option value="嘉義縣">嘉義縣</option>
+              <option value="屏東縣">屏東縣</option>
+              <option value="花蓮縣">花蓮縣</option>
+              <option value="臺東縣">臺東縣</option>
+              <option value="金門縣">金門縣</option>
+              <option value="馬公市">馬公市</option>
+            </select>
+            <input type="text" v-model="district" name="district" placeholder="行政區" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" />
+            <input type="text" v-model="addr" name="house_local" placeholder="地址街道地址（不包含巷弄樓層）" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-1/3 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" />
+          </div>
+        </div>
+        <!-- Input -->
+        <div class="md:flex md:items-center mb-6">
+          <div class="md:w-1/3"></div>
+          <div class="md:w-2/3">
+            <input type="number" v-model="landSize" step="0.01" name="landsize_Ibuy" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" placeholder="你想買的物件坪數" />
+            <input type="number" v-model="floor" name="which_floor" placeholder="樓層" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" />
+            <input type="number" v-model="houseYear" name="house_year" placeholder="屋齡" class="bg-gray-200 appearance-none border-2 border-gray-200 rounded mr-4 w-1/5 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" />
+          </div>
+        </div>
+        <!-- Notice -->
+        <div class="md:flex md:items-center mb-6">
+          <div class="md:w-1/3"></div>
+          <div class="md:w-2/3">
+            <p class="text-gray-500 text-sm">若不須篩選該項條件，將其欄位留空即可。</p>
+          </div>
+        </div>
+        <!-- Submit -->
+        <div class="md:flex md:items-center mb-6">
+          <div class="md:w-1/3"></div>
+          <div class="md:w-2/3">
+            <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" @click="onSearch">聽話！讓小丁看看！</button>
+          </div>
+        </div>
+      </section>
       <!-- Result Section -->
       <section class="leading-7">
         <header>
@@ -143,8 +142,12 @@
             <h1 class="text-lg font-bold">坪數與公設綜合分析</h1>
           </header>
           <div class="flex items-center">
-          <canvas id="chart" class="cv" width="600" height="400"></canvas>
-          <canvas id="chart1" class="cv" width="600" height="400"></canvas>
+            <div class="w-1/2 p-4">
+              <canvas id="priceChart" width="600" height="400"></canvas>
+            </div>
+            <div class="w-1/2 p-4">
+              <canvas id="publicChart" width="600" height="400"></canvas>
+            </div>
           </div>
         </section>
 
@@ -152,6 +155,33 @@
           <header>
             <h1 class="text-lg font-bold">實價登錄分析</h1>
           </header>
+          <div>
+            {% for which_floor in content|sort %}
+            <div class="panel-group" id="floor{{which_floor}}panel">
+              <div class="panel panel-default">
+                <div class="mb-2 py-2">
+                  <a @click.prevent="viewFloor('collapse{{which_floor}}')" href="#collapse{{which_floor}}" class="text-blue-500 hover:text-blue-800">
+                    樓層 #{{which_floor}} - 平均每坪 {{'%.2f'|format(content[which_floor]['perland_avgCost']|float)}} 萬元
+                  </a>
+                  <div id="collapse{{which_floor}}" class="hidden floorTable">
+                    <table class="border-collapse table-auto w-full text-sm">
+                      <thead>
+                        <tr>{% for l in labels %}<th class="border-b dark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">{{l}}</th>{% endfor %}</tr>
+                      </thead>
+                      <tbody class="bg-white dark:bg-slate-800">
+                        {% for curr_row in content[which_floor]['currFloorDB'] %}
+                        <tr>
+                          {% for each_col in curr_row %}<td class="border-b border-slate-100 dark:border-slate-700 p-4 pl-8 text-slate-500 dark:text-slate-400">{{ each_col }}</td>{% endfor %}
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
         </section>
       {% endif %}
     </div>
@@ -197,12 +227,82 @@
             houseYear,
             onSearch: () => {
               location.replace(`/?city=${city.value}&district=${district.value || ''}&houseAddr=${addr.value || ''}&year_begin=${yearBegin.value}&year_end=${yearEnd.value}&house_year=${houseYear.value || ''}&which_floor=${floor.value || ''}&landsize_Ibuy=${landSize.value || ''}`);
+            },
+            viewFloor: (floorId) => {
+              document.querySelectorAll('.floorTable').forEach($el => $el.classList.add('hidden'))
+              document.getElementById(floorId).classList.toggle('hidden')
             }
           }
         }
       })
 
       app.mount('#app')
+    </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const $priceChart = document.getElementById('priceChart')
+        const $publicChart = document.getElementById('publicChart')
+
+        const chartContent = JSON.parse(`{{content|tojson}}`);
+        const floorLabels = []
+        const avgLandCost = []
+        const avgSharedPercent = []
+
+        {% for which_floor in content|sort %}
+        floorLabels.push("{{which_floor}} 樓");
+        avgLandCost.push({{ content[which_floor]['perland_avgCost'] }});
+        avgSharedPercent.push({{ content[which_floor]['currFloor_avgSharedPercent'] }});
+        {% endfor %}
+
+        if($priceChart) {
+          const priceCtx = $priceChart.getContext('2d')
+          const priceChart = new Chart(priceCtx, {
+            type: 'line',
+            data: {
+              labels: floorLabels,
+              datasets: [{
+                label: '按樓層每坪單價分佈（單位：萬）',
+                data: avgLandCost
+              }]
+            }, options: {
+              scales: {
+                yAxes: [{
+                  ticks: {
+                    beginAtZero: true,
+                    min: 0,
+                    stepSize: 5,
+                  }
+                }]
+              }
+            }
+          })
+        }
+
+        if($publicChart) {
+          const publicCtx = $publicChart.getContext('2d')
+          const publicChart = new Chart(publicCtx, {
+            type: 'line',
+            data: {
+              labels: floorLabels,
+              datasets: [{
+                label: '按樓層公設比分佈（單位：％）',
+                data: avgSharedPercent
+              }]
+            },      options: {
+              scales: {
+                yAxes: [{
+                  ticks: {
+                    beginAtZero: true,
+                    min: 0,
+                    max: 100,
+                    stepSize: 5,
+                  }
+                }]
+              }
+            }
+          });
+        }
+      })
     </script>
   </body>
 </html>
