@@ -1,4 +1,6 @@
-# buyHouseAnalyzer
+# 小丁看房神器 v1.0
+
+此專案目前線上版已架設好供大家直接使用：http://house.30cm.tw/
 
 <a href="https://p.opay.tw/9F9ik"><img src="https://payment.opay.tw/Content/themes/WebStyle201404/images/allpay.png" /></a>
 <br>
