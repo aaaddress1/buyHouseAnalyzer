@@ -76,7 +76,7 @@ for city_symbol in ['a','f']:# 'b', 'c', 'd', 'e',  ]:#'g', 'h', 'i', 'j', 'k', 
 '''
 
 # Taipei = "a"
-def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor, in_houseOld, in_yearRange):
+def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor, in_houseOld, in_yearRange, in_onlyHaveCarResult):
 
 	
 	dfs = []
@@ -114,7 +114,9 @@ def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor, in
 			# 車車資訊
 			carcar_land_used = float(curr_row['車位移轉總面積(平方公尺)']) * 0.3025
 			carcar_moneycost = int(int(curr_row['車位總價元']) /10000)
-
+			if in_onlyHaveCarResult and carcar_moneycost < 1:
+				continue
+			
 			# 主建物資訊
 			bought_land_size = round(( float(curr_row['主建物面積']) +float(curr_row['附屬建物面積']) + float(curr_row['陽台面積']) )* 0.3025, 2)
 			bought_shared_land_size = float(curr_row['建物移轉總面積平方公尺']) * 0.3025 -bought_land_size

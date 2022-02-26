@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
   <head>
-    <title>小丁線上看房 [v1.0]</title>
+    <title>小丁看房神器 [v1.01]</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
@@ -84,8 +84,14 @@
         </div>
         <!-- Notice -->
         <div class="md:flex md:items-center mb-6">
-          <div class="md:w-1/3"></div>
+          <div class="md:w-1/3">
+          </div>
           <div class="md:w-2/3">
+            <div class="form-check form-switch">
+              
+              <input class="form-check-input" type="checkbox"  v-model="onlyHaveCarResult">
+              <label class="form-check-label text-gray-500 text-sm" for="flexSwitchCheckDefault">僅分析具有車位的房屋結果</label>
+            </div>
             <p class="text-gray-500 text-sm">若不須篩選該項條件，將其欄位留空即可。</p>
           </div>
         </div>
@@ -215,7 +221,7 @@
           const landSize = Vue.ref({{ dbInitVal['landsize_Ibuy'] or '' }})
           const floor = Vue.ref({{ dbInitVal['which_floor'] or '' }})
           const houseYear = Vue.ref({{ dbInitVal['house_year'] or '' }})
-
+          const onlyHaveCarResult = Vue.ref({{ dbInitVal['onlyHaveCarResult'] or '' }})
           return {
             yearBegin,
             yearEnd,
@@ -225,8 +231,9 @@
             landSize,
             floor,
             houseYear,
+            onlyHaveCarResult,
             onSearch: () => {
-              location.replace(`/?city=${city.value}&district=${district.value || ''}&houseAddr=${addr.value || ''}&year_begin=${yearBegin.value}&year_end=${yearEnd.value}&house_year=${houseYear.value || ''}&which_floor=${floor.value || ''}&landsize_Ibuy=${landSize.value || ''}`);
+              location.replace(`/?city=${city.value}&district=${district.value || ''}&houseAddr=${addr.value || ''}&year_begin=${yearBegin.value}&year_end=${yearEnd.value}&house_year=${houseYear.value || ''}&which_floor=${floor.value || ''}&landsize_Ibuy=${landSize.value || ''}&onlyHaveCarResult=${onlyHaveCarResult.value||''}`);
             },
             viewFloor: (floorId) => {
               document.querySelectorAll('.floorTable').forEach($el => $el.classList.add('hidden'))
