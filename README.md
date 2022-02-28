@@ -7,4 +7,5 @@
 
 若使用上有任何計算疏漏或者功能建議都歡迎 發PR 提 Issue 或來信 aaaddress1@chroot.org<br>
 歡迎各位大佬打賞小額支持伺服器租賃費用，目前只敢開 Digital Ocean 低規主機 QQ<br><br>
-<a href="https://p.opay.tw/9F9ik"><img src="https://payment.opay.tw/Content/themes/WebStyle201404/images/allpay.png" /></a>
+   <a href="https://www.buymeacoffee.com/aaaddress1"><img src="https://img.buymeacoffee.com/button-api/?text=打賞支持🙏&emoji=&slug=aaaddress1&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
+       
