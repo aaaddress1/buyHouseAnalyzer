@@ -105,6 +105,7 @@
         <div class="md:flex md:items-center mb-6">
           <div class="md:w-1/3"></div>
           <div class="md:w-2/3">
+            <p class="text-red-500 text-sm" id="errorHint"></p>
             <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" @click="onSearch">聽話！讓小丁看看！</button>
           </div>
         </div>
@@ -221,6 +222,8 @@
     </footer>
 
     <script>
+      haveSubmittedRequest = false;
+
       const app = Vue.createApp({
         setup() {
           const yearBegin = Vue.ref({{ dbInitVal['year_begin'] or 2018 }})
@@ -243,7 +246,15 @@
             houseYear,
             onlyHaveCarResult,
             onSearch: () => {
-              location.replace(`/?city=${city.value}&district=${district.value || ''}&houseAddr=${addr.value || ''}&year_begin=${yearBegin.value}&year_end=${yearEnd.value}&house_year=${houseYear.value || ''}&which_floor=${floor.value || ''}&landsize_Ibuy=${landSize.value || ''}&onlyHaveCarResult=${onlyHaveCarResult.value||''}`);
+
+              if ((district.value.length < 1) && (addr.value.length < 1))
+                document.getElementById('errorHint').innerHTML = "篩選條件必須至少填寫「區」或者「街道路名」兩者其一（或同時填寫）";
+              else
+                if (!haveSubmittedRequest) {
+                  location.replace(`/?city=${city.value}&district=${district.value || ''}&houseAddr=${addr.value || ''}&year_begin=${yearBegin.value}&year_end=${yearEnd.value}&house_year=${houseYear.value || ''}&which_floor=${floor.value || ''}&landsize_Ibuy=${landSize.value || ''}&onlyHaveCarResult=${onlyHaveCarResult.value||''}`);
+                  haveSubmittedRequest = true;
+                }
+                
             },
             viewFloor: (floorId) => {
               document.querySelectorAll('.floorTable').forEach($el => $el.classList.add('hidden'))
