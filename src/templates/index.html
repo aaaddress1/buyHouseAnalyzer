@@ -7,7 +7,7 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
   <head>
-    <title>小丁看房神器 [v1.01]</title>
+    <title>小丁看房神器 [v1.02]</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
@@ -154,12 +154,16 @@
             <h1 class="text-lg font-bold">坪數與公設綜合分析</h1>
           </header>
           <div class="flex items-center">
-            <div class="w-1/2 p-4">
-              <canvas id="priceChart" width="600" height="400"></canvas>
-            </div>
-            <div class="w-1/2 p-4">
-              <canvas id="publicChart" width="600" height="400"></canvas>
-            </div>
+   
+            <canvas id="priceChart" width="100%" height="400"></canvas>
+
+          </div>
+          
+
+          <div class="flex items-center">
+
+            <canvas id="publicChart" width="100%" height="400"></canvas>
+  
           </div>
         </section>
 
@@ -178,12 +182,12 @@
                   <div id="collapse{{which_floor}}" class="hidden floorTable">
                     <table class="border-collapse table-auto w-full text-sm">
                       <thead>
-                        <tr>{% for l in labels %}<th class="border-b dark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">{{l}}</th>{% endfor %}</tr>
+                        <tr>{% for l in labels %}<th class="border-b dark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 dark:text-slate-700 text-left">{{l}}</th>{% endfor %}</tr>
                       </thead>
-                      <tbody class="bg-white dark:bg-slate-800">
+                      <tbody class="bg-white dark:bg-slate-100">
                         {% for curr_row in content[which_floor]['currFloorDB'] %}
                         <tr>
-                          {% for each_col in curr_row %}<td class="border-b border-slate-100 dark:border-slate-700 p-4 pl-8 text-slate-500 dark:text-slate-400">{{ each_col }}</td>{% endfor %}
+                          {% for each_col in curr_row %}<td class="border-b border-slate-100 dark:border-slate-700 p-4 pl-8 text-slate-500 dark:text-slate-700">{{ each_col }}</td>{% endfor %}
                         </tr>
                         {% endfor %}
                       </tbody>
