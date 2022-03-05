@@ -119,8 +119,7 @@ def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor, in
 			
 			# 主建物資訊
 			bought_land_size = round(( float(curr_row['主建物面積']) +float(curr_row['附屬建物面積']) + float(curr_row['陽台面積']) )* 0.3025, 2)
-			bought_shared_land_size = float(curr_row['建物移轉總面積平方公尺']) * 0.3025 -bought_land_size
-			bought_shared_land_percent = round((bought_land_size / float(curr_row['建物移轉總面積平方公尺']) / 0.3025)*100, 2)
+			bought_shared_land_percent = round((1 - ((bought_land_size / float(curr_row['建物移轉總面積平方公尺']) / 0.3025)))*100, 2)
 			if isinstance(curr_row['移轉層次'], str):
 				which_floor = curr_row['移轉層次'][:-1]
 			elif isinstance(curr_row['移轉層次'], str):
@@ -169,7 +168,7 @@ def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor, in
 				ret[which_floor]['currFloorDB'].append([ 
 					pp_bought_datetime, 
 					curr_row['土地位置建物門牌'],
-					f"{curr_row['建物現況格局-房']}房{curr_row['建物現況格局-廳']}廳{curr_row['建物現況格局-衛']}衛/{curr_row['建物現況格局-隔間']}夾層",
+					curr_row['建物型態'] + (curr_row['主要用途'] if '用' in curr_row['主要用途'] else ''), #f"{curr_row['建物現況格局-房']}房{curr_row['建物現況格局-廳']}廳{curr_row['建物現況格局-衛']}衛/{curr_row['建物現況格局-隔間']}夾層",
 					which_floor,
 					house_so_old, 
 					bought_land_size, 

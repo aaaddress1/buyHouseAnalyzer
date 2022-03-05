@@ -183,12 +183,12 @@
                   <div id="collapse{{which_floor}}" class="hidden floorTable">
                     <table class="border-collapse table-auto w-full text-sm">
                       <thead>
-                        <tr>{% for l in labels %}<th class="border-b dark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 dark:text-slate-700 text-left">{{l}}</th>{% endfor %}</tr>
+                        <tr>{% for l in labels %}<th class="border-b font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 dark:text-slate-700 text-left">{{l}}</th>{% endfor %}</tr>
                       </thead>
-                      <tbody class="bg-white dark:bg-slate-100">
+                      <tbody class="bg-white dark:bg-yellow-100">
                         {% for curr_row in content[which_floor]['currFloorDB'] %}
                         <tr>
-                          {% for each_col in curr_row %}<td class="border-b border-slate-100 dark:border-slate-700 p-4 pl-8 text-slate-500 dark:text-slate-700">{{ each_col }}</td>{% endfor %}
+                          {% for each_col in curr_row %}<td class="border-b  p-4 pl-8 text-slate-500 dark:text-slate-700">{{ each_col }}</td>{% endfor %}
                         </tr>
                         {% endfor %}
                       </tbody>
