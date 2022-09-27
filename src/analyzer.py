@@ -98,6 +98,7 @@ def fetchHouseInfo(in_city_symbol, in_house_addr, in_district, in_whichFloor, in
 	df['單價元平方公尺'] = df['單價元平方公尺'].astype(float)
 	df['單價元坪'] = df['單價元平方公尺'] * 3.30579
 	df['土地位置建物門牌'] = df['土地位置建物門牌'].apply(lambda a: transform_CNnum_toNormal_Num(a))
+	df['主建物面積'] = df['主建物面積'].astype(float)
 
 	if in_house_addr: df = df[ df['土地位置建物門牌'].str.contains(in_house_addr, na=False) ]
 	if in_district: df = df[ df['鄉鎮市區'].str.contains(in_district, na=False) ]
