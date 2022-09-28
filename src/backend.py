@@ -16,7 +16,7 @@ def hello_world():
     year_range = range(1, 200) # 民國一年～兩百年
 
     if request.args.get('year_begin') and request.args.get('year_end'):
-        year_range = range(int(request.args.get('year_begin')) -1911, int(request.args.get('year_end'))- 1911)
+        year_range = range(int(request.args.get('year_begin')) -1911, int(request.args.get('year_end'))- 1911 + 1)
 
 
     city = request.args.get('city')
