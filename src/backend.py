@@ -13,10 +13,10 @@ def hello_world():
     landsize_Ibuy = float(request.args.get('landsize_Ibuy'))  if request.args.get('landsize_Ibuy') else None
     house_year = int(request.args.get('house_year')) if request.args.get('house_year') else None
     onlyHaveCarResult = request.args.get('onlyHaveCarResult')
-    year_range = range(1, 200) # 民國一年～兩百年
-
     if request.args.get('year_begin') and request.args.get('year_end'):
-        year_range = range(int(request.args.get('year_begin')) -1911, int(request.args.get('year_end'))- 1911 + 1)
+        year_range = range(int(request.args.get('year_begin')), int(request.args.get('year_end')) + 1)
+    else:
+        year_range = range(2018, 2022)
 
 
     city = request.args.get('city')
@@ -27,9 +27,8 @@ def hello_world():
         'onlyHaveCarResult': onlyHaveCarResult
     }
 
-    city_symbol = analyzer.country_map[city.replace('台', '臺')]
     if houseAddr or district:
-        _, __, analyzeResult = analyzer.fetchHouseInfo(city_symbol, houseAddr, district, which_floor, house_year, year_range, onlyHaveCarResult)
+        _, __, analyzeResult = analyzer.fetchHouseInfo_fromSqlite(city.replace('台', '臺'), houseAddr, district, which_floor, house_year, year_range, onlyHaveCarResult)
         return render_template('index.html', labels=_, content=(__), dbInitVal = user_input_record, analyzeResult = analyzeResult)
     else:
         return render_template('index.html', labels=[], content={}, dbInitVal = user_input_record, analyzeResult = {})

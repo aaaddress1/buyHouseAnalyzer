@@ -14,6 +14,7 @@ def real_estate_crawler(year, season):
         
       # download real estate zip file
       res = requests.get("https://plvr.land.moi.gov.tw//DownloadSeason?season="+str(year)+"S"+str(season)+"&type=zip&fileName=lvr_landcsv.zip")
+      print(res)
       # save content to file
       fname = str(year)+str(season)+'.zip'
       open(fname, 'wb').write(res.content)
@@ -32,6 +33,6 @@ def real_estate_crawler(year, season):
 
 import shutil
 for d in [d for d in os.listdir() if d[:4] == 'real']: shutil.rmtree(d)
-for year in tqdm.tqdm(range(108, 112)):
+for year in tqdm.tqdm(range(100, 112)):
     for season in range(1,5):
           if not real_estate_crawler(year, season): break # last one records?
