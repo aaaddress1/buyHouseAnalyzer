@@ -60,7 +60,7 @@ def transform_CNnum_toNormal_Num(in_str):
 
 db = sqlite3.connect('database.db')
 
-db.cursor().execute("drop table houseinfo;")
+db.cursor().execute("drop table if exists houseinfo;")
 if list(db.cursor().execute("SELECT name FROM sqlite_master WHERE type='table' AND name='houseInfo';")) == []:
     print('[!] first time running? building fresh table now!')
     db.execute('''CREATE TABLE houseInfo
