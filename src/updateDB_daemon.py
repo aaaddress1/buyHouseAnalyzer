@@ -101,7 +101,10 @@ def parse(dfs):
 
         try:
             # 車車資訊
-            carcar_land_used = float(curr_row['車位移轉總面積(平方公尺)']) * 0.3025
+            if '車位移轉總面積(平方公尺)' in curr_row:
+                carcar_land_used = float(curr_row['車位移轉總面積(平方公尺)']) * 0.3025
+            else:
+                carcar_land_used = float(curr_row['車位移轉總面積平方公尺']) * 0.3025
             carcar_moneycost = int(int(curr_row['車位總價元']) /10000)
             # 主建物資訊
             bought_land_size = round(( float(curr_row['主建物面積']) +float(curr_row['附屬建物面積']) + float(curr_row['陽台面積']) )* 0.3025, 2)
